@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script>
+			    var xmlhttp;
+                if (window.XMLHttpRequest) {
+                    xmlhttp=new XMLHttpRequest();
+                } else {
+                    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+                }
+
+                xmlhttp.onreadystatechange = function() {
+                    if (xmlhttp.readyState==3 && xmlhttp.status==200) {
+                    	//alert(xmlhttp.readyState);
+                    	alert(xmlhttp.responseText);
+                    } else if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                        alert('finished');
+                    }
+                }
+
+                function ajax(id,method,value) {
+                    xmlhttp.open("GET","pers.php",true);
+                    xmlhttp.send();
+                }
+		</script>
+	</head>
+	<body>
+		<div id='output'>
+
+		</div>
+	</body>
+
+	<script>
+		ajax(1,2,3);
+	</script>
+</html>

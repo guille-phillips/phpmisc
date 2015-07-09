@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script>
+			function board() {
+				var my = this;
+				this.positions = [];
+				
+				this.initialise =
+					function () {
+						var backrank = [1,2,3,4,5,3,2,1]; // rook, knight, bishop, king, queen, bishop, knight, rook
+						for (pos=0; pos<64; pos++) {
+							if (pos>=0 && pos<=7) {
+								my.positions[pos] = backrank[pos];
+							} else if (pos>=8 && pos<=15) {
+								my.positions[pos] = 6;
+							} else if (pos>=48 && pos<=55) {
+								my.positions[pos] = 6+8;
+							} else if (pos>=56 && pos<64) {
+								my.positions[pos] = backrank[pos-56]+8;
+							} else {
+								my.positions[pos] = 0;
+							}
+							
+						}
+					}();
+
+
+				this.gethtml = 
+					function () {
+					var html = '';
+					var pieces = ['&nbsp;','R','N','B','K','Q','P'];
+					var square_css = ['white-square','black-square'];
+					var piece_css = ['white-piece','black-piece'];
+
+					var pos = 0;
+					for (row=0; row <=7; row++) {
+						html += '<div>';
+						for (column=0; column<=7; column++) {
+							var piece_class='';
+							if (my.positions[pos]!=0) {
+								piece_class = piece_css[my.positions[pos]>>3];
+							}
+							var onmousedown = ' onmousedown = "SelectSquare('+pos+',true);"';
+							var onmouseup = ' onmouseup = "SelectSquare('+pos+',false);"';
+							html += '<div id="square_'+pos+'" class="'+square_css[(pos+row)%2]+' '+piece_class+'" '+onmousedown+onmouseup+'>'+pieces[my.positions[pos]%8]+'</div>';
+							pos++;
+						}
+						html += '</div>';
+					}
+					return html;
+				};
+
+				this.movepiece =
+					function(from_square,to_square) {
+						my.positions[to_square] = my.positions[from_square];
+						my.positions[from_square] = 0;
+					};
+
+				this.possiblemoves = 
+					function(pos) {
+						var possibles = [];
+						if (my.positions[pos]==0) {
+							return possibles; 
+						}
+						var piece_type = my.positions[pos]%8;
+						var piece_colour = my.positions[pos]>>3;
+						switch (piece_type) {
+							case 1 : // rook
+								var vectors = [[1,0]];
+								var single_step = false;
+								var all_directions = true;
+								break;
+							case 2 : // knight
+								var vectors = [[1,2],[2,1]];
+								var single_step = true;
+								var all_directions = true;
+								break;
+							case 3 : // bishop
+								var vectors = [[1,1]];
+								var single_step = false;
+								var all_directions = true;
+								break;
+							case 4 : // King
+								var vectors = [[1,0],[1,1]];
+								var single_step = true;
+								var all_directions = true;
+								break;
+							case 5 : // Queeen
+								var vectors = [[1,0],[1,1]];
+								var single_step = false;
+								var all_directions = true;
+								break;
+							case 6 : // Pawn
+								var single_step = true;
+								var all_directions = false;
+								switch (piece_colour) {
+									case 0:
+										var vectors = [[0,1],[1,1,true],[-1,1,true]];
+										break;
+									case 1:
+										var vectors = [[0,-1],[1,-1,true],[-1,-1,true]];
+										break;
+								}
+						}
+						for (var direction = 0; direction <= (all_directions?3:0); direction++) { // we rotate around each compass point
+							for (var index in vectors) {
+								var vector = vectors[index];
+								var check_next = true;
+								var this_position = pos;
+								var extension = 1;
+								var pos_vector = [(pos%8),(pos>>>3)];
+								while (check_next) {
+									var offset_vector = [pos_vector[0]+vector[0]*extension, pos_vector[1]+vector[1]*extension];
+									if (offset_vector[0]<0 || offset_vector[0]>7 || offset_vector[1]<0 || offset_vector[1]>7) {
+										check_next = false;
+									} else {
+										var offset_pos = offset_vector[0]+offset_vector[1]*8;
+										var check_piece_colour = my.positions[offset_pos]>>>3;
+										if (my.positions[offset_pos]==0 || check_piece_colour!=piece_colour) {
+											possibles.push(offset_pos);
+										}
+										if (my.positions[offset_pos]!=0) {
+											check_next = false;
+										}
+									}
+									
+									extension++
+									if (single_step) {
+										check_next = false;
+									}
+								}
+								vectors[index] = [vectors[index][1],-vectors[index][0]]; // rotate anti-clockwise
+							}
+						}
+
+						return possibles;
+					};
+
+				this.showpossibles = 
+					function (positions, show_hide) {
+						var pieces = ['&nbsp;','R','N','B','K','Q','P'];
+						for (var index in positions) {
+							document.getElementById('square_'+positions[index]).innerHTML = show_hide?'*':pieces[my.positions[positions[index]]%8];
+							if (show_hide) {
+								document.getElementById('square_'+positions[index]).className += ' highlight';
+							} else {
+								document.getElementById('square_'+positions[index]).className = document.getElementById('square_'+positions[index]).className.replace(' highlight','');
+							}
+						}
+					}
+			}
+
+			var previous_pos = -1;
+			function SelectSquare(pos, key_down) {
+				var moves = layout.possiblemoves(pos);
+				layout.showpossibles(moves, key_down);
+
+				if (!key_down) {
+					
+				} else {
+
+				}
+
+				if (!show_hide) {
+					document.getElementById('square_'+pos).className = document.getElementById('square_'+pos).className.replace(' select_square','');
+					document.getElementById('square_'+pos).className  += ' select_square';
+				}
+				if (pos!=previous_pos && previous_pos!=-1) {
+					document.getElementById('square_'+previous_pos).className = document.getElementById('square_'+previous_pos).className.replace(' select_square','');
+					layout.movepiece(previous_pos,pos);
+					document.getElementById('board').innerHTML = layout.gethtml();
+					if (!show_hide) {
+						previous_pos = -1;
+					}
+				} else {
+					previous_pos = pos;
+				}
+				
+			}
+		</script>
+		<style>
+			#board > div > div {
+				display:inline-block;
+				width:50px;
+				height:50px;
+				
+				text-align: center;
+				font-style: bold;
+				cursor: default;
+			}
+
+			.black-square {
+				background-color: #000;
+				border:1px solid black;
+			}
+			.white-square {
+				background-color: #fff;
+				border:1px solid black;
+			}
+
+			.black-piece {
+				color:red;
+			}
+
+			.white-piece {
+				color:green;
+			}
+
+			.highlight {
+				color: #888;
+			}
+
+			.select_square {
+				border: 1px solid #f0f;
+			}
+
+			body {
+				background-color: #ccc;
+			}
+		</style>
+	</head>
+	<body>
+		<div id='board'>no board</div>
+	</body>
+	<script>
+			var layout = new board();
+			layout.movepiece(4,4+8*3)
+			document.getElementById('board').innerHTML = layout.gethtml();	
+	</script>
+</html>
