@@ -20,7 +20,7 @@
 		$items = $json->items;
 
 
-		$xml = <<<XML
+		$xml = <<<"XML"
 <?xml version='1.0' encoding='UTF-8'?>
 <feed xmlns='http://www.w3.org/2005/Atom'
     xmlns:openSearch='http://a9.com/-/spec/opensearch/1.1/'
@@ -31,19 +31,20 @@
     xmlns:yt='http://gdata.youtube.com/schemas/2007'
     xmlns:gd='http://schemas.google.com/g/2005'
     gd:etag='W/&quot;CE4EQH47eCp7ImA9WxRQGEQ.&quot;'>
-  <id>tag:youtube.com,2008:standardfeed:global:most_popular</id>		
+\t<id>tag:youtube.com,2008:standardfeed:global:most_popular</id>\r\n
 XML;
 
 		foreach ($items as $item) {
 			$snippet = $item->snippet;
 			$title = $snippet->title;
-			$descriptton = $snippet->description;
+			$description = $snippet->description;
 
-			$xml .= '<entry>\r\n';
-			$xml .= '</entry>\r\n';
+			$xml .= "\t<entry>\r\n";
+			$xml .= "\t\t<title>$title</title>\r\n";
+			$xml .= "\t</entry>\r\n";
 		}
 
-		$xml .= '</feed>';
+		$xml .= "</feed>\r\n";
 		return $xml;
 	}
 
@@ -54,9 +55,8 @@ XML;
 
 	$json = json_decode(CURLGet("https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=$uploads_playlist_id&key=AIzaSyBbQeECnN1g6ez9RRtyuuOxBq5LBGsTbDE"));
 
+	echo MapV2toV3($json);
+	echo '-----------------------------------------------------------------------------';
 	print_r($json);
 
-	echo '-----------------------------------------------------------------------------';
-
-	echo MapV2toV3($json);
 ?>
