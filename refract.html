@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script>
+			function Initialise() {
+				var image = document.getElementById("image");
+				var image_overlay = document.getElementById("image_overlay");
+
+				var source = document.getElementById("source");
+
+				var overlay_ctx = document.getElementById("overlay").getContext("2d");
+		  		var source_ctx = document.getElementById("source").getContext("2d");
+		  		var destination_ctx = document.getElementById("destination").getContext("2d");
+
+		  		source_ctx.canvas.width = image.width;
+		  		source_ctx.canvas.height = image.height;
+
+		  		overlay_ctx.canvas.width = image_overlay.width;
+		  		overlay_ctx.canvas.height = image_overlay.height;
+
+		  		destination_ctx.canvas.width = image.width;
+		  		destination_ctx.canvas.height = image.height;
+
+		  		source_ctx.drawImage(image,0,0);
+		  		overlay_ctx.drawImage(image_overlay,0,0);
+
+//alert(overlay_ctx.getImageData(0,0,1,1).data[3]);
+
+				var dx;
+				var dy;
+
+		  		for (var x = 0; x < image.width; x+=4) {
+		  			for (var y = 0; y <image.height; y+=4) {
+
+		  				var pixel = overlay_ctx.getImageData(x,y,2,2).data;
+
+		  				dx = x+(pixel[3]-pixel[7])*3;
+		  				dy = y+(pixel[11]-pixel[15])*3;;
+						if (pixel[3]>0) {
+							if (dx>0 && dy>0) {
+								destination_ctx.drawImage(image,dx,dy,1,1,x,y,16,16);
+							}
+						} else {
+							destination_ctx.drawImage(image,x,y,16,16,x,y,16,16);
+						}
+		  				
+		  			}
+		  		}
+
+				destination_ctx.drawImage(overlay,0,0);
+			}
+		</script>
+		<style>
+			canvas {
+				border:1px solid red;
+			}
+			img {
+				display:none;
+			}
+			#source {
+				display:none;
+			}
+			#overlay {
+				display:none;
+			}
+		</style>
+	</head>
+	<body onload="Initialise();">
+		<img id="image" src="chequerboard.jpg">
+		<img id="image_overlay" src="CHROMALOGO.png">
+		<canvas id="source"></canvas>
+		<canvas id="overlay"></canvas>
+		<canvas id="destination"></canvas>
+	</body>
+</html>
