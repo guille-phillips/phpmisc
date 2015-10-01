@@ -46,7 +46,9 @@ RULES;
 				for ($minute = 0; $minute <=5; $minute++) {
 					$array{$minute} = false;
 				}
-				break;				
+				break;
+			case 'W':
+				$array = array('MON'=>false,'TUE'=>false,'WED'=>false,'THU'=>false,'FRI'=>false,'SAT'=>false,'SUN'=>false);
 		}
 		
 		foreach ($tree->nodes[1]->nodes as $node) {

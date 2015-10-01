@@ -26,28 +26,69 @@
 
 //alert(overlay_ctx.getImageData(0,0,1,1).data[3]);
 
-				var dx;
-				var dy;
+				var offset_x = 0;
+				var offset_y = -0;
 
-		  		for (var x = 0; x < image.width; x+=4) {
-		  			for (var y = 0; y <image.height; y+=4) {
+				for (offset_x = 0; offset_x <100; offset_x++) {
 
-		  				var pixel = overlay_ctx.getImageData(x,y,2,2).data;
+					break;
+				}
 
-		  				dx = x+(pixel[3]-pixel[7])*3;
-		  				dy = y+(pixel[11]-pixel[15])*3;;
-						if (pixel[3]>0) {
-							if (dx>0 && dy>0) {
-								destination_ctx.drawImage(image,dx,dy,1,1,x,y,16,16);
+				window.requestAnimFrame = (function(callback) {
+				  return (
+				    window.requestAnimationFrame || 
+				    window.webkitRequestAnimationFrame || 
+				    window.mozRequestAnimationFrame || 
+				    window.oRequestAnimationFrame || 
+				    window.msRequestAnimationFrame ||
+				    function(callback) {
+				      window.setTimeout(callback, 30);
+				    }
+				  );
+				})();
+
+				window.requestAnimFrame(DrawLogo);
+
+				function DrawLogo(){
+					var dx;
+					var dy;
+
+					var pixels = overlay_ctx.getImageData(offset_x,offset_y,image.width,image.height).data;
+					var pixel_index = 3;
+
+					var width = image.width;
+					var height = image.height;
+
+					destination_ctx.drawImage(image,0,0,width,height);
+
+			  		for (var y = 0; y < height; y+=4) {
+			  			for (var x = 0; x < width; x+=4) {
+			  				pixel0 = pixels[pixel_index];
+			  				pixel1 = pixels[pixel_index+4];
+			  				//pixel2 = pixels[pixel_index+8];
+			  				pixel3 = pixels[pixel_index+width];
+			  				//pixel4 = pixels[pixel_index+width*2];
+
+			  				dx = x-(pixel0-pixel1)/10;
+			  				dy = y-(pixel0-pixel3)/10;
+							if (pixel0>0) {
+								if (dx>0 && dy>0) {
+									destination_ctx.drawImage(image,dx,dy,4,4,x,y,4,4);
+								}
 							}
-						} else {
-							destination_ctx.drawImage(image,x,y,16,16,x,y,16,16);
-						}
-		  				
-		  			}
-		  		}
+			  				
+			  				pixel_index = 3+x*4+y*width*4;
+			  			}
+			  		}
 
-				destination_ctx.drawImage(overlay,0,0);
+					destination_ctx.drawImage(overlay,-offset_x,-offset_y);
+
+					offset_x += 2;
+
+					if (offset_x<width) {
+						window.requestAnimFrame(DrawLogo);
+					}
+				}
 			}
 		</script>
 		<style>
@@ -66,7 +107,7 @@
 		</style>
 	</head>
 	<body onload="Initialise();">
-		<img id="image" src="chequerboard.jpg">
+		<img id="image" src="kylie2.jpg">
 		<img id="image_overlay" src="CHROMALOGO.png">
 		<canvas id="source"></canvas>
 		<canvas id="overlay"></canvas>

@@ -39,18 +39,25 @@ XML;
 			$snippet = $item->snippet;
 			$thumbnail_url = $snippet->thumbnails->default->url;
 			$video_id = $snippet->resourceId->videoId;
+			$title = $snippet->title;
+			$description = $snippet->description;
 
-			$json_video = json_decode(CURLGet("https://www.googleapis.com/youtube/v3/videos?id=$video_id&part=contentDetails,statistics,suggestions&key=AIzaSyBbQeECnN1g6ez9RRtyuuOxBq5LBGsTbDE"));
+			$json_video = json_decode(CURLGet("https://www.googleapis.com/youtube/v3/videos?id=$video_id&part=contentDetails,statistics&key=AIzaSyD1_qysE9Fpdvc6MgI2k79awCsSI6Ot2g8"));
+
+// AIzaSyD1_qysE9Fpdvc6MgI2k79awCsSI6Ot2g8 for RUK account
+// AIzaSyBbQeECnN1g6ez9RRtyuuOxBq5LBGsTbDE for GMP account
 
 			print_r($json_video);
 
 			$duration = $json_video->items[0]->contentDetails->duration;
 			$view_count = $json_video->items[0]->statistics->viewCount;
 			$favourite_count = $json_video->items[0]->statistics->favoriteCount;
-			$author_name = "dunno";
+			$author_name = "RackingUK";
 
 			$xml .= "\t<entry>\r\n";
-			$xml .= "\t\t<id>>$video_id</id>\r\n";
+			$xml .= "\t\t<id>$video_id</id>\r\n";
+			$xml .= "\t\t<title>$title</title>\r\n";
+			$xml .= "\t\t<content>$description</content>\r\n";
 			$xml .= "\t\t<gd:rating min='' max='' numRaters='' average='' />\r\n";
 			$xml .= "\t\t<yt:statistics viewCount='$view_count' favoriteCount='$favourite_count'>\r\n";
 			$xml .= "\t\t<author>\r\n";
@@ -67,12 +74,17 @@ XML;
 		return $xml;
 	}
 
-	$json = json_decode(CURLGet('https://www.googleapis.com/youtube/v3/channels?part=contentDetails&forUsername=Racingukcom&key=AIzaSyBbQeECnN1g6ez9RRtyuuOxBq5LBGsTbDE'));
+	$json = json_decode(CURLGet('https://www.googleapis.com/youtube/v3/channels?part=contentDetails&forUsername=RUKTV1&key=AIzaSyBbQeECnN1g6ez9RRtyuuOxBq5LBGsTbDE'));
+
+
 
 	$uploads_playlist_id = $json->items[0]->contentDetails->relatedPlaylists->uploads;
 
 
 	$json = json_decode(CURLGet("https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=$uploads_playlist_id&key=AIzaSyBbQeECnN1g6ez9RRtyuuOxBq5LBGsTbDE"));
+
+	//print_r($json);
+	//exit;
 
 	print_r(MapV2toV3($json));
 	echo "-----------------------------------------------------------------------------\r\n";
